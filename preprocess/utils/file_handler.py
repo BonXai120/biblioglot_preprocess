@@ -6,17 +6,13 @@ def read_file(text_path):
         with open(text_path, encoding="UTF-8") as text:
             full_text = text.read()
             return full_text
-    except (FileNotFoundError, TypeError) as error:
-        if error == FileNotFoundError:
-            print("ERROR: File was not found ")
-            sys.exit(1)
-        elif error == TypeError:
-            print("ERROR: Invalid file path type")
-            sys.exit(1)
+    except () as error:
+        print(error)
 
-def write_file(file_path, write_text):
+
+def write_file(file_path="file.txt", write_text=""):
     try:
-        with open(file_path, mode="a+", encoding="UTF-8") as file:
+        with open(file_path, mode="w+", encoding="UTF-8") as file:
             file.write(write_text)
     except () as error:
         print(error)

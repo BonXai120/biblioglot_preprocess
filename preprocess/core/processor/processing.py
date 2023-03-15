@@ -7,6 +7,7 @@ def text_processing(language, text_path):
     clean_text = clean_raw_text(raw_text)
     parsed_text = Parser.ParsedText(language, clean_text)
     json_document = cjf.construct_json_document(parsed_text)
+    fr.write_file("test.json", json_document)
 
 def clean_raw_text(raw_text):
     stripped_text = raw_text.replace("\n\n", " (PARAGRAPH_END). ")

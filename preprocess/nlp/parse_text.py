@@ -19,7 +19,6 @@ class ParsedText:
     
     def populate_annotations(self, doc_sentences):
         for sentence in doc_sentences:
-
             tokens = []
             for token in sentence.tokens:
                 self.add_token(token)

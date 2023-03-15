@@ -4,3 +4,4 @@ notes/
 .prettierignore
 .vscode/
 test.py
+tests/
