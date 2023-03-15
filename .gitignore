@@ -3,3 +3,4 @@ notes/
 .pylintrc
 .prettierignore
 .vscode
+test.py
