@@ -14,4 +14,4 @@ def create_arg_parser():
 
 def process_command():
     args = create_arg_parser()
-    processing.text_processing(args.language, args.text)
+    processing.full_processing(args.language, args.text)
