@@ -4,3 +4,4 @@ notes/
 .prettierignore
 .vscode/
 tests/
+config.ini

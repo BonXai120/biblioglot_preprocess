@@ -1,25 +1,21 @@
 import ijson
 from preprocess.database.json import Json_Object as jo
+import constants as c
+import config
 
-def request_definitions(word="", cache=None):
-    if word[0].lower() not in spanish_characters:
-        return
-    with open(f"/home/vincent/Documents/dictionaries/spanish/{spanish_characters[word[0].lower()]}.json",mode="r") as d:
-        dictionary = ijson.items(d,"item")
-        definitions_list = []
-        cache_list = set()
-        if item["word"].lower() in cache:
-            return
+class DefinitionCollection:
+    def __init__(self):
+        self.collection = []
+    
+    def toJSON():
+        return json.dumps(self.collection, default=lambda o: o.__dict__, ensure_ascii=False, indent=1)
 
+class DefinitionFullData:
+    def __init__(self, word="", pos="", senses=None):
+        self.word = word
+        self.pos = pos
+        self.senses = senses
 
-        for item in dictionary:
-            if((item["word"].lower()==word.lower()) and (item["word"].lower() not in cache_list) ):
-                senses = SensesObject(item)
-                word_definition = jo.DefinitionFullData(word=item["word"], pos=item["pos"], senses=senses)
-                print(word_definition.word)
-                definitions_list.append(word_definition)
-        return definitions_list
-        
 class SensesObject:
     def __init__(self, item):
         self.senses_list = []
@@ -42,3 +38,20 @@ class SensesObject:
                 for link in sense["links"]:
                     self.add_link(sense_dict, link)
             self.senses_list.append(sense_dict)
+
+
+def request_definitions(word=""):
+    co = config.get_configs()
+    if word[0].lower() not in c.SPANISH_CHAR_SET:
+        return
+    with open(f"{co['PATH']['ES_DICT_PATH']}{c.SPANISH_CHAR_SET[word[0].lower()]}.json",mode="r") as d:
+        dictionary = ijson.items(d,"item")
+        definitions_list = []
+
+        for item in dictionary:
+            if((item["word"].lower()==word.lower())):
+                senses = SensesObject(item)
+                word_definition = DefinitionFullData(word=item["word"], pos=item["pos"], senses=senses)
+                definitions_list.append(word_definition)
+        return definitions_list
+        

@@ -9,10 +9,6 @@ def construct_json_document(parsedText, language=""):
     return json_document
 
 def construct_json_sentence(sentence, language="", id=0):
-    if "PARAGRAPH_END" in sentence.text:
-        sentence_json_object = j.SentenceFullData(paragraph_end=True)
-        return sentence_json_object
-    
     token_index = 0
     token_list = []
     for token in sentence.tokens:
@@ -33,7 +29,6 @@ def construct_json_token(token, language="", id=0):
 
 def construct_json_word(word, language="", id=0):
     word_json_object = j.WordFullData(text=word.text, lemma=word.lemma, upos=word.upos, id=id)
-    definition_list = d.request_definitions(word=word.text)
     return word_json_object
 
 def construct_json_collection(parsedText, language=""):
