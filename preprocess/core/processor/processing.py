@@ -6,7 +6,7 @@ def full_processing(language, text_path):
     raw_text = fr.read_file(text_path)
     clean_text = clean_raw_text(raw_text)
     parsed_text = Parser.ParsedText(language, clean_text)
-    json_document = cjf.construct_json_document(parsed_text, language.upper())
+    json_document = cjf.construct_json_document(parsed_text, language)
     fr.write_file("tests/test.json", json_document)
 
 def clean_raw_text(raw_text):

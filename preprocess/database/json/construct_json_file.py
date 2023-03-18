@@ -12,6 +12,8 @@ def construct_json_sentence(sentence, language="", id=0):
     token_index = 0
     token_list = []
     for token in sentence.tokens:
+        if token.words[0].upos == "PUNCT" or token.words[0].upos == "SYM":
+            continue
         token_list.append(construct_json_token(token, language, token_index)) 
         token_index += 1
     sentence_json_object = j.SentenceFullData(text=sentence.text, tokens=token_list, id=id)
@@ -29,6 +31,7 @@ def construct_json_token(token, language="", id=0):
 
 def construct_json_word(word, language="", id=0):
     word_json_object = j.WordFullData(text=word.text, lemma=word.lemma, upos=word.upos, id=id)
+    d.request_definitions(word=word.text, language=language)
     return word_json_object
 
 def construct_json_collection(parsedText, language=""):

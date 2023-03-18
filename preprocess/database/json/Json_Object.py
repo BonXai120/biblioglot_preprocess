@@ -42,7 +42,7 @@ class WordFullData:
         self.type = "word"
         self.text = text
         self.lemma = lemma
-        self.upos = c.POS_TAGS_SET[upos]
+        self.upos = upos
         self.audio_id = audio_id
         self.definition_id = definition_id
 
