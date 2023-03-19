@@ -2,8 +2,34 @@ SPANISH_CHAR_SET = {'&': '0', '*': '1', '-': '2', '0': '3', '1': '4', '2': '5', 
 
 POS_TAGS_SET = {"ADJ":"adjective","ADP":"adposition","ADV":"adverb","AUX":"auxiliary","CCONJ":"coordinationg conjunction","DET":"determiner","INTJ":"interjection","NOUN":"noun","NUM":"numeral","PART":"particle","PRON":"pronoun","PROPN":"proper noun","PUNCT":"punctuation","SCONJ":"subordinating conjunction","SYM":"symbol","VERB":"verb","X":"other"}
 
+import ijson
+from collections import defaultdict
+import preprocess.database.mongo.operations as mongo
+import config as cf
+from pymongo import MongoClient
 
+CURRENT_KEYS = set()
+DICTIONARY = defaultdict(list)
 
+def init_dictionary(language):
+    CURRENT_DB = get_elems(language)
+    for i in CURRENT_DB:
+        CURRENT_KEYS.add(i["word"].lower())
+    dict_path = get_dict_path(language)
+    with open(dict_path, "r") as file:
+        data = ijson.items(file, "item")
+        for item in data:
+            DICTIONARY[item["word"].lower()].append(item)
 
+def get_elems(language):
+    CONNECTION_STRING = cf.get_configs()["DATABASE"]["CONNECTION"]
+    client = MongoClient(CONNECTION_STRING)
+    db = client["dictionary"]
+    result = db[language].find({}, {"word": 1})
+    return result
 
+def get_dict_path(language):
+    if(language == "es"):
+        path = cd["PATH"]["ES_DICT_PATH "]   
+    return path
 

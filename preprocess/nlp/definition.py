@@ -5,6 +5,8 @@ import config
 import preprocess.database.mongo.operations as mongo
 import re
 
+insert_load = {}
+
 class DefinitionCollection:
     def __init__(self):
         self.collection = []
@@ -44,28 +46,29 @@ class SensesObject:
 
 def request_definitions(word="", language=""):
     co = config.get_configs()
-    regex = re.compile(word.lower(), re.IGNORECASE)
-    query = mongo.query("word", regex, "dictionary", language)
+    # regex = re.compile(word.lower(), re.IGNORECASE)
+    # db = mongo.get_database("dictionary")
+    # query = mongo.query_count(key_name="word", value=regex, db=db, collection_name=language)
 
-    if len(list(query)) > 0:
+    if word.lower() in insert_load:
+        print(insert_load[word.lower()])
+    if word.lower() in c.CURRENT_KEYS:
         return
     if word[0].lower() not in c.SPANISH_CHAR_SET:
         return
+    definition_list = []
+    for item in c.DICTIONARY[word.lower()]:
+        senses = SensesObject(item)
+        word_definition = DefinitionFullData(word=item["word"], pos=item["pos"], senses=senses)
+        definition_dict = to_dict(word_definition)
+        definition_list.append(definition_dict)
 
-    with open(f"{co['PATH']['ES_DICT_PATH']}{c.SPANISH_CHAR_SET[word[0].lower()]}.json",mode="r") as d:
-        dictionary = ijson.items(d,"item")
-        definition_list = []
-
-        for item in dictionary:
-            if((item["word"].lower()==word.lower())):
-                senses = SensesObject(item)
-                word_definition = DefinitionFullData(word=item["word"], pos=item["pos"], senses=senses)
-                definition_dict = to_dict(word_definition)
-                definition_list.append(definition_dict)
+    insert_load[word.lower()] = definition_list
         
-        if len(definition_list) == 0:
-            print(f"{word} not found in dictionary")
-        mongo.insert_many(definition_list, "dictionary", language)
+    if len(definition_list) == 0:
+        print(f"{word} not found in dictionary")
+        return
+    # mongo.insert_many(definition_list, "dictionary", language)
         
 def to_dict(obj):
     if isinstance(obj, (list, tuple)):
