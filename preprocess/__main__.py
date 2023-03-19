@@ -8,5 +8,6 @@ def main(task, language, text_path):
         p.story_processing(language, text_path)
     elif task == "definition":
         c.init_dictionary(language)
+        p.definition_processing(language, text_path)
 
     

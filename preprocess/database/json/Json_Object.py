@@ -9,11 +9,12 @@ class JsonObjectCollection:
         return json.dumps(self.collection, default=lambda o: o.__dict__, ensure_ascii=False, indent=1)
 
 class SentenceFullData:
-    def __init__(self, text="", tokens=None, audio_id="", translation="", id=0):
-        self.id = id
+    def __init__(self, text="", tokens=None, audio_id="", translation="", uuid="", index=0):
+        self.index = index
+        self.uuid = uuid
         self.type = "sentence"
         self.text = text
-        self.audio_id = audio_id
+        self.audio_id = index
         self.translation = translation
         self.tokens = tokens
 
@@ -24,11 +25,10 @@ class SentenceFullData:
         self.tokens.append(token)
 
 class TokenFullData:
-    def __init__(self, text = "", words=None, audio_id="", id=0):
-        self.id = id
+    def __init__(self, text = "", words=None):
+
         self.type = "token"
         self.text = text
-        self.audio_id = audio_id    
         self.words = words
 
     def add_word(self, word):
@@ -37,14 +37,11 @@ class TokenFullData:
         self.words.append(word)
 
 class WordFullData:
-    def __init__(self, text="", lemma="", upos="", audio_id="", definition_id="", id=0):
-        self.id = id        
+    def __init__(self, text="", lemma="", upos=""):    
         self.type = "word"
         self.text = text
         self.lemma = lemma
         self.upos = upos
-        self.audio_id = audio_id
-        self.definition_id = definition_id
 
 
 

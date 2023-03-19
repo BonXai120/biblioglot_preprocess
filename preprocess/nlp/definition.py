@@ -4,8 +4,8 @@ import constants as c
 import config
 import preprocess.database.mongo.operations as mongo
 import re
-
-insert_load = {}
+from uuid import uuid4
+from preprocess.utils.to_dict import to_dict
 
 class DefinitionCollection:
     def __init__(self):
@@ -15,47 +15,40 @@ class DefinitionCollection:
         return json.dumps(self.collection, default=lambda o: o.__dict__, ensure_ascii=False, indent=1)
 
 class DefinitionFullData:
-    def __init__(self, word="", pos="", senses=None):
+    def __init__(self, word="", pos="", audio_id="", senses=None):
         self.word = word
         self.pos = pos
+        self.audio_id = audio_id
         self.senses = senses
 
 class SensesObject:
     def __init__(self, item):
         self.senses_list = []
         self.populate_senses(item)
-    
-    def add_gloss(self, sense, definition):
-        sense["glosses"].append(definition)
-
-    def add_link(self, sense, link):
-        sense["links"].append(link)
-
     def populate_senses(self, item):
         for sense in item["senses"]:
-            sense_dict = {"glosses":[], "links": []}
-
-            if "glosses" in sense:
-                for gloss in sense["glosses"]:
-                    self.add_gloss(sense_dict ,gloss)
+            sense_dict = {"glosses":[], "links": [], "tags": []}
+            if "raw_glosses" in sense:
+                sense_dict["glosses"] = sense["raw_glosses"]
             if "links" in sense:
-                for link in sense["links"]:
-                    self.add_link(sense_dict, link)
+                sense_dict["links"] = sense["links"]
+            if "tags" in sense:
+                sense_dict["tags"] = sense["tags"]
             self.senses_list.append(sense_dict)
 
+class WordLoad:
+    def __init__(self, found_words=None, unfound_words=None):
+        self.found_words = found_words
+        self.unfound_words = unfound_words
 
-def request_definitions(word="", language=""):
+
+def request_definition(word="", current_words=None, unfound_words=None):
     co = config.get_configs()
-    # regex = re.compile(word.lower(), re.IGNORECASE)
-    # db = mongo.get_database("dictionary")
-    # query = mongo.query_count(key_name="word", value=regex, db=db, collection_name=language)
+    if word in current_words:
+        return
+    if word.lower() in c.CURRENT_DB_KEYS:
+        return
 
-    if word.lower() in insert_load:
-        print(insert_load[word.lower()])
-    if word.lower() in c.CURRENT_KEYS:
-        return
-    if word[0].lower() not in c.SPANISH_CHAR_SET:
-        return
     definition_list = []
     for item in c.DICTIONARY[word.lower()]:
         senses = SensesObject(item)
@@ -63,19 +56,28 @@ def request_definitions(word="", language=""):
         definition_dict = to_dict(word_definition)
         definition_list.append(definition_dict)
 
-    insert_load[word.lower()] = definition_list
-        
     if len(definition_list) == 0:
-        print(f"{word} not found in dictionary")
+        unfound_words.append({"word": word})
         return
-    # mongo.insert_many(definition_list, "dictionary", language)
+
+    current_words[word] = definition_list
         
-def to_dict(obj):
-    if isinstance(obj, (list, tuple)):
-        return [to_dict(item) for item in obj]
-    elif isinstance(obj, dict):
-        return {key: to_dict(value) for key, value in obj.items()}
-    elif hasattr(obj, '__dict__'):
-        return to_dict(obj.__dict__)
-    else:
-        return obj
+def extract_words(json_data):
+    word_set = set()
+    for sentence in json_data:
+        for token in sentence["tokens"]:
+            word_set.add(token["text"])
+            for word in token["words"]:
+                word_set.add(word["text"])
+                word_set.add(word["lemma"])
+    return word_set
+
+def get_definitions(json_data):
+    word_set = extract_words(json_data)
+    word_dict = {}
+    unfound_list = []
+    for word in word_set:
+        request_definition(word=word.lower(), current_words=word_dict, unfound_words=unfound_list)
+    load = WordLoad(found_words=word_dict, unfound_words=unfound_list)
+    return load
+

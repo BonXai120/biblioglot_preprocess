@@ -8,13 +8,13 @@ import preprocess.database.mongo.operations as mongo
 import config as cf
 from pymongo import MongoClient
 
-CURRENT_KEYS = set()
+CURRENT_DB_KEYS = set()
 DICTIONARY = defaultdict(list)
 
 def init_dictionary(language):
     CURRENT_DB = get_elems(language)
     for i in CURRENT_DB:
-        CURRENT_KEYS.add(i["word"].lower())
+        CURRENT_DB_KEYS.add(i["word"].lower())
     dict_path = get_dict_path(language)
     with open(dict_path, "r") as file:
         data = ijson.items(file, "item")
@@ -30,6 +30,6 @@ def get_elems(language):
 
 def get_dict_path(language):
     if(language == "es"):
-        path = cd["PATH"]["ES_DICT_PATH "]   
+        path = cf.get_configs()["PATH"]["ES_DICT_PATH"]   
     return path
 
