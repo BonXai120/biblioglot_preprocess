@@ -17,6 +17,7 @@ class DefinitionCollection:
 class DefinitionFullData:
     def __init__(self, word="", pos="", audio_id="", senses=None):
         self.word = word
+        self.lemma = lemma
         self.pos = pos
         self.audio_id = audio_id
         self.senses = senses
@@ -27,11 +28,14 @@ class SensesObject:
         self.populate_senses(item)
     def populate_senses(self, item):
         for sense in item["senses"]:
-            sense_dict = {"glosses":[], "links": [], "tags": []}
+            sense_dict = {"definition":[], "links": [], "tags": []}
             if "raw_glosses" in sense:
-                sense_dict["glosses"] = sense["raw_glosses"]
+                sense_dict["definition"] = sense["raw_glosses"]
             if "links" in sense:
-                sense_dict["links"] = sense["links"]
+                for link in sense["links"]:
+                    for string in link:
+                        if "#Spanish" in string:
+                            sense_dict["links"].append(string)
             if "tags" in sense:
                 sense_dict["tags"] = sense["tags"]
             self.senses_list.append(sense_dict)
@@ -44,15 +48,18 @@ class WordLoad:
 
 def request_definition(word="", current_words=None, unfound_words=None):
     co = config.get_configs()
+
     if word in current_words:
         return
-    if word.lower() in c.CURRENT_DB_KEYS:
+    if word in unfound_words:
+        return    
+    if word in c.CURRENT_DB_KEYS:
         return
 
     definition_list = []
-    for item in c.DICTIONARY[word.lower()]:
+    for item in c.DICTIONARY[word]:
         senses = SensesObject(item)
-        word_definition = DefinitionFullData(word=item["word"], pos=item["pos"], senses=senses)
+        word_definition = DefinitionFullData(word=item["word"], pos=item["pos"], senses=senses.senses_list)
         definition_dict = to_dict(word_definition)
         definition_list.append(definition_dict)
 

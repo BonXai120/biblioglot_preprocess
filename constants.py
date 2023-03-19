@@ -12,19 +12,30 @@ CURRENT_DB_KEYS = set()
 DICTIONARY = defaultdict(list)
 
 def init_dictionary(language):
-    CURRENT_DB = get_elems(language)
+    CURRENT_DB = get_found(language)
+    UNFOUND_DB = get_unfound(language)
     for i in CURRENT_DB:
         CURRENT_DB_KEYS.add(i["word"].lower())
+    for i in UNFOUND_DB:
+        CURRENT_DB_KEYS.add(i["word"].lower())
+
     dict_path = get_dict_path(language)
     with open(dict_path, "r") as file:
         data = ijson.items(file, "item")
         for item in data:
             DICTIONARY[item["word"].lower()].append(item)
 
-def get_elems(language):
+def get_found(language):
     CONNECTION_STRING = cf.get_configs()["DATABASE"]["CONNECTION"]
     client = MongoClient(CONNECTION_STRING)
     db = client["dictionary"]
+    result = db[language].find({}, {"word": 1})
+    return result
+
+def get_unfound(language):
+    CONNECTION_STRING = cf.get_configs()["DATABASE"]["CONNECTION"]
+    client = MongoClient(CONNECTION_STRING)
+    db = client["unfound"]
     result = db[language].find({}, {"word": 1})
     return result
 

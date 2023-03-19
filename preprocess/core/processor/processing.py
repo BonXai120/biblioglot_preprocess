@@ -19,12 +19,13 @@ def definition_processing(language, file_path):
         word_load = d.get_definitions(story)
         found_words = word_load.found_words
         unfound_words = word_load.unfound_words
-        print(unfound_words)
         found_db = mongo.get_database("dictionary")
-        for i in found_words:
-            mongo.insert_many(found_words[i], found_db, language)
-        unfound_db = mongo.get_database("unfound")
-        mongo.insert_many(unfound_words, unfound_db, language)
+        if len(found_words) != 0:
+            for i in found_words:
+                mongo.insert_many(found_words[i], found_db, language)
+        if len(unfound_words) != 0:
+            unfound_db = mongo.get_database("unfound")
+            mongo.insert_many(unfound_words, unfound_db, language)
 
 def clean_raw_text(raw_text):
     stripped_text = raw_text.replace("\n", " ")
