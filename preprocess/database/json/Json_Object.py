@@ -9,13 +9,11 @@ class JsonObjectCollection:
         return json.dumps(self.collection, default=lambda o: o.__dict__, ensure_ascii=False, indent=1)
 
 class SentenceFullData:
-    def __init__(self, text="", tokens=None, audio_id="", translation="", uuid="", index=0):
+    def __init__(self, text="", tokens=None, audio_id="", index=0):
         self.index = index
-        self.uuid = uuid
         self.type = "sentence"
         self.text = text
         self.audio_id = index
-        self.translation = translation
         self.tokens = tokens
 
 

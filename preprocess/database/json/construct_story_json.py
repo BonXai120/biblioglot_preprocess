@@ -13,7 +13,7 @@ def construct_json_sentence(sentence, language="", place_id=0):
     token_list = []
     for token in sentence.tokens:
         token_list.append(construct_json_token(token, language)) 
-    sentence_json_object = j.SentenceFullData(text=sentence.text, tokens=token_list, uuid=str(uuid4()), index=place_id)
+    sentence_json_object = j.SentenceFullData(text=sentence.text, tokens=token_list, index=place_id)
     return sentence_json_object
 
 def construct_json_token(token, language=""):

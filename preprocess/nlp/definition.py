@@ -52,7 +52,7 @@ class WordLoad:
         self.unfound_words = unfound_words
 
 
-def request_definition(word="", current_words=None, unfound_words=None, word_set=None):
+def request_definition(word="", current_words=None, unfound_words=None, word_set=None, found_list=None):
     co = config.get_configs()
     
     if word in current_words:
@@ -68,6 +68,7 @@ def request_definition(word="", current_words=None, unfound_words=None, word_set
         word_definition = DefinitionFullData(word=item["word"], pos=item["pos"], senses=senses.senses_list)
         definition_dict = to_dict(word_definition)
         definition_list.append(definition_dict)
+        found_list.append(definition_dict)
 
     if len(definition_list) == 0:
         unfound_words.append({"word": word})
@@ -87,11 +88,12 @@ def extract_words(json_data):
 
 def get_definitions(json_data):
     word_set = extract_words(json_data)
+    found_list = jo.JsonObjectCollection()
     word_dict = {}
-    unfound_list = []
+    unfound_list = jo.JsonObjectCollection()
     while len(word_set) != 0:
         word = word_set.pop()
-        request_definition(word=word.lower(), current_words=word_dict, unfound_words=unfound_list, word_set=word_set)
-    load = WordLoad(found_words=word_dict, unfound_words=unfound_list)
+        request_definition(word=word.lower(), current_words=word_dict, unfound_words=unfound_list.collection, word_set=word_set, found_list=found_list.collection)
+    load = WordLoad(found_words=found_list, unfound_words=unfound_list)
     return load
 
