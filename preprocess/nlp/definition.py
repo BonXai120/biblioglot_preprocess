@@ -17,16 +17,15 @@ class DefinitionCollection:
 class DefinitionFullData:
     def __init__(self, word="", pos="", audio_id="", senses=None):
         self.word = word
-        self.lemma = lemma
         self.pos = pos
         self.audio_id = audio_id
         self.senses = senses
 
 class SensesObject:
-    def __init__(self, item):
+    def __init__(self, item, current, unfound, word_set):
         self.senses_list = []
-        self.populate_senses(item)
-    def populate_senses(self, item):
+        self.populate_senses(item, current, unfound, word_set)
+    def populate_senses(self, item, current, unfound, word_set):
         for sense in item["senses"]:
             sense_dict = {"definition":[], "links": [], "tags": []}
             if "raw_glosses" in sense:
@@ -36,6 +35,13 @@ class SensesObject:
                     for string in link:
                         if "#Spanish" in string:
                             sense_dict["links"].append(string)
+                            link_word = string.split("#Spanish", 1)[0]
+                            split_words = link_word.split(" ")
+                            for w in split_words:
+                                if(w not in current or w not in unfound or w not in c.CURRENT_DB_KEYS):
+                                    word_set.add(w)
+                                    
+
             if "tags" in sense:
                 sense_dict["tags"] = sense["tags"]
             self.senses_list.append(sense_dict)
@@ -46,9 +52,9 @@ class WordLoad:
         self.unfound_words = unfound_words
 
 
-def request_definition(word="", current_words=None, unfound_words=None):
+def request_definition(word="", current_words=None, unfound_words=None, word_set=None):
     co = config.get_configs()
-
+    
     if word in current_words:
         return
     if word in unfound_words:
@@ -58,7 +64,7 @@ def request_definition(word="", current_words=None, unfound_words=None):
 
     definition_list = []
     for item in c.DICTIONARY[word]:
-        senses = SensesObject(item)
+        senses = SensesObject(item, current_words, unfound_words, word_set)
         word_definition = DefinitionFullData(word=item["word"], pos=item["pos"], senses=senses.senses_list)
         definition_dict = to_dict(word_definition)
         definition_list.append(definition_dict)
@@ -83,8 +89,9 @@ def get_definitions(json_data):
     word_set = extract_words(json_data)
     word_dict = {}
     unfound_list = []
-    for word in word_set:
-        request_definition(word=word.lower(), current_words=word_dict, unfound_words=unfound_list)
+    while len(word_set) != 0:
+        word = word_set.pop()
+        request_definition(word=word.lower(), current_words=word_dict, unfound_words=unfound_list, word_set=word_set)
     load = WordLoad(found_words=word_dict, unfound_words=unfound_list)
     return load
 

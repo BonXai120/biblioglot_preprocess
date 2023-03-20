@@ -7,9 +7,16 @@ from collections import defaultdict
 import preprocess.database.mongo.operations as mongo
 import config as cf
 from pymongo import MongoClient
+import os
+import time
 
 CURRENT_DB_KEYS = set()
 DICTIONARY = defaultdict(list)
+
+
+def dict_worker(DICTIONARY):
+    global dictionary
+    dictionary = DICTIONARY
 
 def init_dictionary(language):
     CURRENT_DB = get_found(language)
@@ -24,6 +31,7 @@ def init_dictionary(language):
         data = ijson.items(file, "item")
         for item in data:
             DICTIONARY[item["word"].lower()].append(item)
+
 
 def get_found(language):
     CONNECTION_STRING = cf.get_configs()["DATABASE"]["CONNECTION"]
