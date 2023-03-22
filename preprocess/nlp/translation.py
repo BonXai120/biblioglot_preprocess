@@ -22,8 +22,7 @@ def request_translation(sentence, language=""):
     except () as error:
         print(error)
 
-def create_translation_json(json_data, language):
-    translation_list = []
+def create_translation_json(json_data, language, translation_list):
     for sentence in json_data:
         translation = request_translation(sentence["text"], language)
         t_object = TranslationFullData(sentence=sentence["text"], index=sentence["index"], translation=translation)
@@ -32,5 +31,5 @@ def create_translation_json(json_data, language):
 
 def get_translations(json_data, language):
     translation_objects = j.JsonObjectCollection()
-    translation_objects.collection.append(create_translation_json(json_data, language)) 
+    create_translation_json(json_data, language, translation_objects.collection)
     return translation_objects.toJSON()
