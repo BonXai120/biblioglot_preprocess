@@ -25,8 +25,7 @@ def request_translation(sentence, language=""):
 def create_translation_json(json_data, language):
     translation_list = []
     for sentence in json_data:
-        # translation = request_translation(sentence.text, language)
-        translation = "placeholder"
+        translation = request_translation(sentence["text"], language)
         t_object = TranslationFullData(sentence=sentence["text"], index=sentence["index"], translation=translation)
         translation_list.append(t_object)
     return translation_list
